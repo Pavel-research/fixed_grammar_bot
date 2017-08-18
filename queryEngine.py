@@ -3,6 +3,7 @@ import core.vocabulary as vocabulary
 import grammar_parser as gp;
 import engine.operators as operators;
 import os
+import core.synonims
 
 loc=os.path.dirname(__file__)
 ruleset=gp.RuleSet(loc+'/definitions/grammar.yaml');
@@ -10,6 +11,9 @@ voc=vocabulary.Vocabulary(loc+'/definitions/definition.yaml')
 defs=Collector.Definifion(loc+'/definitions/api.yaml',voc,load=True)
 defs.load("Organization",{"id":"raml-org"})
 #defs.storeCache()
+loc=os.path.dirname(__file__)
+synonims=core.synonims.SynBase(loc+'/definitions/customSynonims.yaml');
+
 
 class Matcher:
 
@@ -22,10 +26,13 @@ max_len=7;
 
 class Preprocessor:
 
-    def writeTerm(self,s,t):
-        if (s in self.terms):
-            self.terms[s].append(t);
-        else: self.terms[s]=[t];
+    def writeTerm(self,tn,t,plural=False):
+        vn=synonims.get(tn);
+        if plural: vn=vn+[v+"s" for v in vn]+[self.pl(v) for v in vn]
+        for s in vn:
+            if (s in self.terms):
+                self.terms[s].append(t);
+            else: self.terms[s]=[t];
 
     def __init__(self,v,defs=None,matcher=Matcher()):
         self.matcher=matcher;
@@ -36,9 +43,11 @@ class Preprocessor:
         for k in self.voc.propertyTerms:
             self.writeTerm(k.lower(),self.voc.propertyTerms[k]);
         for k in self.voc.classTerms:
-            self.writeTerm(k.lower(),self.voc.classTerms[k]);
-            self.writeTerm(k.lower()+"s",self.voc.classTerms[k]);
-            self.writeTerm(k.lower()[0:len(k)-1]+"ies",self.voc.classTerms[k]);
+            self.writeTerm(k.lower(),self.voc.classTerms[k],True);
+
+
+    def pl(self, k):
+        return k.lower()[0:len(k) - 1] + "ies"
 
     def preprocess(self,ts):
         while (True):
@@ -122,7 +131,7 @@ def is_number(s):
     except ValueError:
         return False
 
-skip=["hello","hi","who","that","what","are","is","was","were","a","the","?","Who","What","Which","have"]
+skip=["hello","hi","who","that","what","are","is","was","were","a","the","?","Who","What","Which"]
 
 def tokenize(s):
     res=[]

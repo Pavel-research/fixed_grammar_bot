@@ -10,11 +10,16 @@ import queryEngine as qe;
 engine=qe.QueryEngine();
 
 class TestParse(unittest.TestCase):
-    # def test_which(self):
-    #     gp.debug=True
-    #     res=engine.query("Which repositories have more then 10 issues?").execute();
-    #     print len(res)
-    #     assert len(res)==781;
+
+    def test_company0(self):
+        gp.debug=True
+        res=engine.query("What tickets are opened by users from CISCO").execute();
+        assert len(res)==1;
+
+    def test_which(self):
+        gp.debug=True
+        res=engine.query("Which repositories have more then 10 issues?").execute();
+        assert len(res)==15;
     def test_define2(self):
         gp.debug=True
         res=engine.query("define raml 1 parser as raml-js-parser-2").execute();

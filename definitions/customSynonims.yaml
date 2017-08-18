@@ -1,0 +1,5 @@
+issue: [ticket,bug,task]
+user: [person, guy ]
+create: [file, build, make, open]
+with: [have]
+repositories: [repos]

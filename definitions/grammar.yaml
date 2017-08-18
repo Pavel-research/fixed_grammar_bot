@@ -96,7 +96,7 @@ rules:
      produces: filter
      example: created by gleb or assigned to denis
   - nested:
-     definition: s=selector "with" f=filter s1=selector
+     definition: s=selector ("with"|"have"|"has") f=filter s1=selector
      translation: childFilter(s,f,s1)
      produces: selector
      condition: isChild(s,s1)

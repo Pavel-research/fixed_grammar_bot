@@ -12,6 +12,7 @@ class ClassTerm:
             for p in props:
                 voc.propertyTerms[p].domain=self;
                 self.properties[p]=voc.propertyTerms[p];
+
     def __str__(self):
         return self.name;
     def __repr__(self):

@@ -1,0 +1,33 @@
+base: https://api.github.com
+entities:
+  Organization:
+    term: Organization
+    collections:
+      repositories:
+        range: Repository
+        url: /repos
+    self: /orgs/{id}
+  Repository:
+    term: Repository
+    self: /repos/{login}/{id}
+    collections:
+      issues:
+        range: Issue
+      labels:
+        range: Label
+      milestones:
+        range: Milestone
+      pulls:
+        range: PullRequest
+      assignees:
+        range: User
+  PullRequest:
+    self: /repos/{login}/{repo}/pulls/{id}
+  Label:
+    self: /repos/{login}/{repo}/labels/{id}
+  Milestone:
+    self: /repos/{login}/{repo}/milestones/{id}
+  Issue:
+    self: /repos/{login}/{repo}/issue/{id}
+  User:
+    self: /repos/{login}/{repo}/issue/{id}

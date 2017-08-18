@@ -1,0 +1,148 @@
+intros:
+  - "hello"
+  - "hi"
+  - "please tell me"
+  - "who"
+  - "what is"
+  - "what are"
+  - "which"
+rules:
+  - moreThenCount:
+      definition: ( "more then" | ">" ) c=selector p=pn
+      translation: compare(c,'>',p)
+      produces: filter
+      condition: p.range==int or p.range==float
+      example: more then 5 comments
+  - moreThen:
+      definition: ( "more then" | ">" ) c=selector
+      translation: countCompare(c,'>')
+      produces: filter
+      example: more then 5
+  - lessThen:
+      definition: ( "less then" | "<" ) c=selector
+      translation: countCompare(c,'<')
+      produces: filter
+      example: more then 5
+  - cn2sel:
+      definition: c=cn
+      translation: select(c)
+      produces: selector
+      example: issues
+  - relationSelector:
+      definition: c=selector c1=selector
+      translation: and(related(c),c1)
+      produces: selector
+      example: issues or bugs
+      condition: isSingle(c)
+  - relationSelector2:
+       definition: c=gv c1=selector
+       translation: and(c,c1)
+       produces: selector
+       example: issues or bugs
+  - joinSelector:
+      definition: c=selector ("or" c+=selector)+
+      translation: join(c)
+      produces: selector
+      example: issues or bugs
+  - in:
+      definition: ("in"|"at") c=selector
+      translation: partOf(c)
+      example: in raml-js-parser-2
+      produces: filter
+  - relationSelector3:
+       definition: p=pn c=gv
+       translation: propertyHasValue(p,c)
+       produces: filter
+       example: issues or bugs
+
+  - pc0:
+      definition: c=selector p1=pn f=filter c1=selector
+      translation: c()=>propertyHasValue(p1,and(f,in(c1)))
+      example: created by gleb
+      produces: selector
+      condition: compatibleTypes(p1.domain,c.domain()) and compatibleTypes(p1.range,c1.domain())
+  - pc:
+      definition: p=pn c=selector
+      translation: propertyHasValue(p,c)
+      example: created by gleb
+      produces: filter
+      condition: compatibleTypes(p.range,c.domain()) and not isTrivial(c)
+
+  - takeProperty0:
+     definition: s=selector p=pn
+     translation: property(s,p)
+     example: gleb created
+     produces: selector
+     condition: isSingle(s)
+  - pf:
+      definition: p=pn f=filter
+      translation: propertyHasValue(p,f)
+      example: created more then 5
+      produces: filter
+  - not:
+      definition: " 'not' f1=filter "
+      translation: not(f1)
+      example: not created by gleb
+      produces: filter
+  - composition:
+      definition:  f=filter (("," | "and")? f+=filter)+
+      translation: and(f)
+      produces: filter
+      example: created by gleb, assigned to denis
+      condition: compatibleFilters(f)
+  - union:
+     definition:  f=filter ("or" f+=filter)+
+     translation: or(f)
+     produces: filter
+     example: created by gleb or assigned to denis
+  - nested:
+     definition: s=selector "with" f=filter s1=selector
+     translation: childFilter(s,f,s1)
+     produces: selector
+     condition: isChild(s,s1)
+     example: repositories with more then 10 issues
+  - filterToSel:
+     definition: f=filter s=selector
+     translation: f() => in (s)
+     produces: filter
+     example: create more then 5 issues
+  - applyFilter:
+     definition: s=selector f=filter
+     translation: s() => f()
+     example: issues created by gleb
+     produces: selector
+  - pc1:
+       definition: p=pn c=selector
+       translation: propertyHasValue(p,c)
+       example: created by gleb
+       produces: filter
+       condition: not isTrivial(c)
+  - compareMoreThen:
+      definition: c0=selector p=pn ( "more" | ">" ) c=selector "then" cz2=selector
+      translation: c0()=>propertyHasValue(p, countCompare(count(flow(property(cz2,p),in(c))),'>'))
+      produces: filter
+      example: more then 5
+  - compareLessThen:
+      definition: c0=selector p=pn ( "less" | "<" ) c=selector "then" cz2=selector
+      translation: c0()=>propertyHasValue(p, countCompare(count(flow(property(cz2,p),in(c))),'<'))
+      produces: filter
+      example: more then 5
+  - takeProperty:
+     definition: s=selector p=pn
+     translation: property(s,p)
+     example: gleb created
+     produces: selector
+  - merge:
+      definition: s=selector "with" f=filter
+      translation: s()=> f()
+      produces: selector
+      example: issues with more then 5 comments
+  - takeProperty2:
+     definition: p=pn "of" s=selector
+     translation: property(s,p)
+     example: gleb created
+     produces: selector
+  - count:
+     definition: ' ("how many" | "number of" | "count" | "count of")  p=selector '
+     translation: count(p())
+     example: count open issues in js-parser-2

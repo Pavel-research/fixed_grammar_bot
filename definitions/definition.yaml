@@ -1,0 +1,97 @@
+#%RAML Vocabulary 0.1
+classTerms:
+  NamedEntity:
+    properties:
+      - name
+      - created_at
+      - updated_at
+  Milestone:
+    extends: NamedEntity
+    properties:
+      - state
+  PullRequest:
+    extends: NamedEntity
+  Repository:
+    extends: NamedEntity
+    properties:
+      - owner
+  Organization:
+    extends: NamedEntity
+  Label:
+    extends: NamedEntity
+  User:
+    extends: NamedEntity
+    properties:
+      - created
+      - company
+  Issue:
+    extends: NamedEntity
+    properties:
+      - body
+      - milestone
+      - labels
+      - closed_at
+      - closed_by
+      - user
+      - assignee
+      - number
+      - state
+      - assignee
+      - repository
+      - comments
+  Comment:
+     properties:
+       - created_at
+       - updated_at
+       - body
+       - user
+propertyTerms:
+  created:
+    inverseOf: user
+    range: Issue
+  comments:
+    range: Comment
+  user:
+    range: User
+    extends: creator
+    sameAs: [ created_by, opened_by, filed_by ]
+  assignee:
+    range: User
+    sameAs: [ assigned_to ]
+  company:
+    range: string
+    sameAs: [from_company,companies,from]
+  labels:
+    range: Label
+  closed_by:
+    range: User
+  name:
+    range: string
+  milestone:
+    range: Milestone
+  created_at:
+    range: datetime
+  updated_at:
+    range: datetime
+  state:
+    range: string
+  title:
+    extends: name
+  avatar_url:
+    range: string
+  login:
+    range: string
+  creator:
+    range: User
+  closed_at:
+    range: datetime
+  number:
+    range: integer
+  comments:
+    range: integer
+  body:
+    range: string
+  owner:
+    range: User
+  repository:
+    range: Repository

@@ -1,0 +1,131 @@
+#%RAML 1.0
+title: Github
+baseUri: https://api.github.com/
+mediaType: application/json
+uses:
+  core: coreLib.raml
+resourceTypes:
+  list:
+    get:
+      (core.list):
+      responses:
+        200:
+          body: <<ItemType>>[]
+types:
+  HasId:
+    properties:
+      id:
+        type: integer
+        (core.key): true
+        (core.visibleWhen): false
+        (core.readonly): true
+  Base:
+    type: HasId
+    properties:
+      created_at:
+        type: datetime
+        (core.readonly): true
+      updated_at:
+        type: datetime
+        (core.readonly): true
+      body?: core.markdown
+  Label:
+    type: HasId
+    properties:
+      name: string
+  link: core.relation
+  Milestone:
+    type: HasId
+    properties:
+      number: integer
+      title: string
+  Repository:
+  Issue:
+    type: Base
+    (core.icon): "https://maxcdn.icons8.com/office/PNG/16/Animals/bug-16.png"
+    properties:
+      number:
+        type: string
+        (core.readonly): true
+        (core.visibleWhen): false
+      title: string
+      labels:
+        type: Label[]
+        (core.reference): true
+        uniqueItems: true
+      milestone?:
+        type: Milestone
+        (core.reference): true
+      state:
+        type: string
+        enum: [ open , closed]
+  CreateIssue:
+    properties:
+      title: string
+      milestone?:
+        type: integer
+        (core.reference): Milestone.number
+      labels:
+        type: string[]
+        (core.reference): Label.name
+        uniqueItems: true
+      body?: (core.markdown)
+  EditIssue:
+    type: CreateIssue
+    properties:
+      state:
+        enum: [open , closed]
+        default: open
+
+securitySchemes:
+  basic:
+    type: Basic Authentication
+securedBy: basic
+/repos/{owner}/{repo}:
+  /milestones:
+    type:  { list: {ItemType : Milestone} }
+  /labels:
+    type:  { list: {ItemType : Label} }
+  /issues:
+    get:
+      displayName: Issues
+      (core.errorMessageIn): message
+      (core.basicPaging): { page: page}
+      queryParameters:
+        state:
+            enum: [open, closed, all]
+            default: open
+            displayName: Issue State
+        sort:
+          enum: [comments, created, updated]
+          default: created
+          displayName: Order by
+        page: integer
+      responses:
+        200:
+          body:
+              type: Issue[]
+              (core.columns):  [ title, created_at, updated_at, state ]
+    post:
+      (core.create): Issue
+      displayName: Create Issue
+      body: CreateIssue
+      responses:
+          200:
+            body: Issue
+    /{issueNum}:
+      uriParameters:
+        issueNum:
+          type: integer
+          (core.equalTo): context.number
+      patch:
+        (core.update): Issue
+        body: EditIssue
+        responses:
+          200:
+            body: Issue
+(core.conversionRules):
+  MileStoneToInteger:
+    from: Milestone
+    to: integer
+    selfRule: this.number
